@@ -19,10 +19,11 @@ void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char ac
 
 void make_wtitle8(unsigned char *buf, int xsize, char *title, char act)
 {
-    static char closebtn[14][16] = {
+    static char closebtn[15][16] = {
         "OO     $$     OO",
-        "O    $QQQQ$    O",
-        "    $QQ@@QQ$    ",
+        "O     $QQ$     O",
+        "    $QQQQQQ$    ",
+        "   $QQQ@@QQQ$   ",
         "  $QQ@@@@@@QQ$  ",
         "  $QQ@@@@@@QQ$  ",
         " $QQ@@@@@@@@QQ$ ",
@@ -30,10 +31,10 @@ void make_wtitle8(unsigned char *buf, int xsize, char *title, char act)
         " $QQ@@@@@@@@QQ$ ",
         "  $QQ@@@@@@QQ$  ",
         "  $QQ@@@@@@QQ$  ",
-        "    $QQ@@QQ$    ",
-        "     $QQQQ$     ",
-        "O      $$      O",
-        "OO            OO"
+        "   $QQQ@@QQQ$   ",
+        "    $QQQQQQ$    ",
+        "O     $QQ$     O",
+        "OO     $$     OO"
     };
     int x, y;
     char c, tc, tbc;
@@ -46,7 +47,7 @@ void make_wtitle8(unsigned char *buf, int xsize, char *title, char act)
 	}
 	boxfill8(buf, xsize, tbc, 3, 3, xsize - 4, 20);
 	putfonts8_asc(buf, xsize, 24, 4, tc, title);
-	for (y = 0; y < 14; y++) {
+	for (y = 0; y < 15; y++) {
 		for (x = 0; x < 16; x++) {
 			c = closebtn[y][x];
 			if (c == '@') {

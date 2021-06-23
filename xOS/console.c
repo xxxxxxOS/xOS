@@ -17,7 +17,7 @@ void console_task(struct SHEET *sheet, int memtotal)
 	cons.cur_c = -1;
 	task->cons = &cons;
 
-	if (sheet != 0) {
+	if (cons.sht != 0) {
 		cons.timer = timer_alloc();
 		timer_init(cons.timer, &task->fifo, 1);
 		timer_settime(cons.timer, 50);
@@ -34,7 +34,7 @@ void console_task(struct SHEET *sheet, int memtotal)
 		} else {
 			i = fifo32_get(&task->fifo);
 			io_sti();
-			if (i <= 1) {
+			if (i <= 1 && cons.sht != 0) {
 				if (i != 0) {
 					timer_init(cons.timer, &task->fifo, 0); 
 					if (cons.cur_c >= 0) {
@@ -52,8 +52,8 @@ void console_task(struct SHEET *sheet, int memtotal)
 				cons.cur_c = COL8_FFFFFF;
 			}
 			if (i == 3) {
-				if (sheet != 0) {
-					boxfill8(sheet->buf, sheet->bxsize, COL8_000000,
+				if (cons.sht != 0) {
+					boxfill8(cons.sht->buf, cons.sht->bxsize, COL8_000000,
 						cons.cur_x, cons.cur_y, cons.cur_x + 7, cons.cur_y + 15);
 				}
 				cons.cur_c = -1;
@@ -76,7 +76,7 @@ void console_task(struct SHEET *sheet, int memtotal)
 					cmdline[cons.cur_x / 8 - 2] = 0;
 					cons_newline(&cons);
 					cons_runcmd(cmdline, &cons, fat, memtotal);
-					if (sheet == 0) {
+					if (cons.sht == 0) {
 						cmd_exit(&cons, fat);
 					}
 					cons_putchar(&cons, '>', 1);
@@ -88,12 +88,12 @@ void console_task(struct SHEET *sheet, int memtotal)
 					}
 				}
 			}
-			if (sheet != 0) {
+			if (cons.sht != 0) {
 				if (cons.cur_c >= 0) {
-					boxfill8(sheet->buf, sheet->bxsize, cons.cur_c, 
+					boxfill8(cons.sht->buf, cons.sht->bxsize, cons.cur_c, 
 						cons.cur_x, cons.cur_y, cons.cur_x + 7, cons.cur_y + 15);
 				}
-				sheet_refresh(sheet, cons.cur_x, cons.cur_y, cons.cur_x + 8, cons.cur_y + 16);
+				sheet_refresh(cons.sht, cons.cur_x, cons.cur_y, cons.cur_x + 8, cons.cur_y + 16);
 			}
 		}
 	}
@@ -326,7 +326,6 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 {
 	struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
 	struct FILEINFO *finfo;
-	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
 	char name[18], *p, *q;
 	struct TASK *task = task_now();
 	int i, segsiz, datsiz, esp, dathrb;
@@ -365,12 +364,12 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 			dathrb = *((int *) (p + 0x0014));
 			q = (char *) memman_alloc_4k(memman, segsiz);
 			task->ds_base = (int) q;
-			set_segmdesc(gdt + task->sel / 8 + 1000, finfo->size - 1, (int) p, AR_CODE32_ER + 0x60);
-			set_segmdesc(gdt + task->sel / 8 + 2000, segsiz - 1,      (int) q, AR_DATA32_RW + 0x60);
+			set_segmdesc(task->ldt + 0, finfo->size - 1, (int) p, AR_CODE32_ER + 0x60);
+			set_segmdesc(task->ldt + 1, segsiz - 1,      (int) q, AR_DATA32_RW + 0x60);
 			for (i = 0; i < datsiz; i++) {
 				q[esp + i] = p[dathrb + i];
 			}
-			start_app(0x1b, task->sel + 1000 * 8, esp, task->sel + 2000 * 8, &(task->tss.esp0));
+			start_app(0x1b, 0 * 8 + 4, esp, 1 * 8 + 4, &(task->tss.esp0));
 			shtctl = (struct SHTCTL *) *((int *) 0x0fe4);
 			for (i = 0; i < MAX_SHEETS; i++) {
 				sht = &(shtctl->sheets0[i]);
@@ -399,6 +398,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	struct CONSOLE *cons = task->cons;
 	struct SHTCTL *shtctl = (struct SHTCTL *) *((int *) 0x0fe4);
 	struct SHEET *sht;
+	struct FIFO32 *sys_fifo = (struct FIFO32 *) *((int *) 0x0fec);
 	int *reg = &eax + 1;	
 		
 		
@@ -475,8 +475,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 			}
 			i = fifo32_get(&task->fifo);
 			io_sti();
-			if (i <= 1) { 
-				
+			if (i <= 1  && cons->sht != 0) { 
 				timer_init(cons->timer, &task->fifo, 1); 
 				timer_settime(cons->timer, 50);
 			}
@@ -485,6 +484,13 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 			}
 			if (i == 3) {	
 				cons->cur_c = -1;
+			}
+			if (i == 4) {
+				timer_cancel(cons->timer);
+				io_cli();
+				fifo32_put(sys_fifo, cons->sht - shtctl->sheets0 + 2024);
+				cons->sht = 0;
+				io_sti();
 			}
 			if (i >= 256) { 
 				reg[7] = i - 256;
