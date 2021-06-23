@@ -30,7 +30,7 @@ install :
 
 full :
 	$(MAKE) -C xOS
-
+	$(MAKE) -C apilib
 	$(MAKE) xOS.img
 
 run_full :
@@ -51,13 +51,15 @@ clean :
 
 src_only :
 	$(MAKE) clean
+	$(MAKE) apilib
 	-$(DEL) xOS.img
 
 clean_full :
 	$(MAKE) -C xOS		clean
 
 src_only_full :
-	$(MAKE) -C xOS		src_only
+	$(MAKE) -C xOS			src_only
+	$(MAKE) -C apilib		src_only
 	-$(DEL) xOS.img
 
 refresh :
