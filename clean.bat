@@ -1,1 +1,1 @@
-./make src_only
+./make src_only_full
