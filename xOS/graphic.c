@@ -97,6 +97,78 @@ void radius_box_fill(unsigned char* vram, int xsize, unsigned char c, int x0, in
     boxfill8(vram, xsize, c, x0 + radius, y1 - radius, x1 - radius, y1); // 下
     boxfill8(vram, xsize, c, x0, y0 + radius, x0 + radius, y1 - radius); // 左
 }
+void draw_line(char* buf, int xsize,int x0, int y0, int x1, int y1, int col)
+{
+    int i, x, y, len, dx, dy;
+
+    dx = x1 - x0;
+    dy = y1 - y0;
+    x = x0 << 10;
+    y = y0 << 10;
+    if (dx < 0) {
+        dx = -dx;
+    }
+    if (dy < 0) {
+        dy = -dy;
+    }
+    if (dx >= dy) {
+        len = dx + 1;
+        if (x0 > x1) {
+            dx = -1024;
+        } else {
+            dx = 1024;
+        }
+        if (y0 <= y1) {
+            dy = ((y1 - y0 + 1) << 10) / len;
+        } else {
+            dy = ((y1 - y0 - 1) << 10) / len;
+        }
+    } else {
+        len = dy + 1;
+        if (y0 > y1) {
+            dy = -1024;
+        } else {
+            dy = 1024;
+        }
+        if (x0 <= x1) {
+            dx = ((x1 - x0 + 1) << 10) / len;
+        } else {
+            dx = ((x1 - x0 - 1) << 10) / len;
+        }
+    }
+
+    for (i = 0; i < len; i++) {
+        buf[(y >> 10) * xsize + (x >> 10)] = col;
+        x += dx;
+        y += dy;
+    }
+    return;
+}
+
+void draw_ball(char* vram, int xsize, int x, int y)
+{
+    struct POINT {
+        int x, y;
+    };
+    static struct POINT table[16] = {
+        { 204, 129 }, { 195, 90 }, { 172, 58 }, { 137, 38 }, { 98, 34 },
+        { 61, 46 }, { 31, 73 }, { 15, 110 }, { 15, 148 }, { 31, 185 },
+        { 61, 212 }, { 98, 224 }, { 137, 220 }, { 172, 200 }, { 195, 168 },
+        { 204, 129 }
+    };
+
+    for (int i = 0; i <= 14; i++) {
+        for (int j = i + 1; j <= 15; j++) {
+            int dis = j - i; 
+            if (dis >= 8) {
+                dis = 15 - dis;
+            }
+            if (dis != 0) {
+                draw_line(vram, xsize, table[i].x + x, table[i].y + y, table[j].x + x, table[j].y + y, 8 - dis);
+            }
+        }
+    }
+}
 
 void init_screen8(char* vram, int x, int y)
 {
@@ -132,6 +204,8 @@ void init_screen8(char* vram, int x, int y)
     char good_morning[] = { 4, 5, 6, 7, 8, 9, 10, 0 };
    
     putfonts16_chn(vram, xsize, bar_x + 400, ysize - 35 - bar_bottom, 7, good_morning);
+
+    draw_ball(vram, xsize, xsize / 2 - 108, 242);
     return;
 }
 
