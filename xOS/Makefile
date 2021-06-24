@@ -1,13 +1,13 @@
 OBJS_BOOTPACK = bootpack.obj naskfunc.obj hankaku.obj graphic.obj dsctbl.obj  \
 		int.obj fifo.obj keyboard.obj mouse.obj memory.obj sheet.obj console.obj \
-		mtask.obj window.obj timer.obj file.obj
+		mtask.obj window.obj timer.obj file.obj chn_font.obj
 	
 TOOLPATH = ../../z_tools/
 INCPATH  = ../../z_tools/haribote/
 
 MAKE     = $(TOOLPATH)make.exe -r
 NASK     = $(TOOLPATH)nask.exe
-CC1      = $(TOOLPATH)cc1.exe -I$(INCPATH) -Os -Wall -quiet
+CC1      = $(TOOLPATH)cc1.exe -I$(INCPATH) -Os -Wall -quiet -std=c99 
 GAS2NASK = $(TOOLPATH)gas2nask.exe -a
 OBJ2BIM  = $(TOOLPATH)obj2bim.exe
 MAKEFONT = $(TOOLPATH)makefont.exe

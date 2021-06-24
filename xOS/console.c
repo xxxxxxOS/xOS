@@ -521,7 +521,15 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	}else if (edx == 21) {
 		sht = (struct SHEET *) (ebx & 0xfffffffe);
 		sht->msgs = ds_base + esi;
-	} 
+	} else if(edx == 22) {
+		Mouse_Vis = ebx;
+	} else if (edx == 23) {
+		sht = (struct SHEET *) (ebx & 0xfffffffe);
+		radius_box_fill(sht->buf, sht->bxsize, ebp >> 16, eax, ecx, esi, edi, ebp & (0x0000FFFF));
+		if ((ebx & 1) == 0) {
+			sheet_refresh(sht, eax, ecx, esi + 1, edi + 1);
+		}
+	}
 	return 0;
 }
 

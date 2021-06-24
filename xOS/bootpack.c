@@ -1,4 +1,5 @@
 #include "bootpack.h"
+#include "../apilib.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -8,6 +9,9 @@ void keywin_off(struct SHEET* key_win);
 void keywin_on(struct SHEET* key_win);
 void close_console(struct SHEET* sht);
 void close_constask(struct TASK* task);
+
+char prev_Mouse_Vis = 1;
+char Mouse_Vis = 1;
 
 void HariMain(void)
 {
@@ -24,6 +28,9 @@ void HariMain(void)
     struct SHEET *sht_back, *sht_mouse;
     struct TASK *task_a, *task;
     int last_key_win_loc[2] = { 32, 16 };
+
+    struct MOUSE_WINDOWS_Info mw_info;
+
     static char keytable0[0x80] = {
         0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^', 0x08, 0,
         'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[', 0x0a, 0, 'A', 'S',
@@ -219,8 +226,9 @@ void HariMain(void)
                     wait_KBC_sendready();
                     io_out8(PORT_KEYDAT, keycmd_wait);
                 }
-            } else if (512 <= i && i <= 767) { 
-                if (mouse_decode(&mdec, i - 512) != 0) {
+            } else if (512 <= i && i <= 767) {
+                int decode_res = mouse_decode(&mdec, i - 512);
+                if (decode_res != 0) {
                     
                     mx += mdec.x;
                     my += mdec.y;
@@ -258,7 +266,7 @@ void HariMain(void)
                                             mmx2 = sht->vx0;
                                             new_wy = sht->vy0;
                                         }
-                                        if (sht->bxsize - 21 <= x && x < sht->bxsize - 5 && 5 <= y && y < 19) {
+                                        if (4 <= x && x < 20 && 5 <= y && y < 19) {
                                             if ((sht->flags & 0x10) != 0) { 
                                                 task = sht->task;
                                                 cons_putstr0(task->cons, "\nBreak(mouse) :\n");
@@ -281,11 +289,21 @@ void HariMain(void)
                                             // TODO 窗口的鼠标事件
                                             if (sht->msgs!=0)
                                             {
-                                                ((int *)sht->msgs)[0] = mx;
-                                                // write_mem8(sht->msgs, mx);
+
+                                                mw_info.mx = mx;
+                                                mw_info.my = my;
+                                                mw_info.wx = sht->vx0;
+                                                mw_info.wy = sht->vy0;
+                                                mw_info.dx = x;
+                                                mw_info.dy = y;
+                                                mw_info.status = 1;
+
+                                                for (size_t i = 0; i < sizeof(mw_info); i++) {
+                                                    ((char*)sht->msgs)[i] = ((char *)&mw_info)[i];
+                                                }
                                             }
-                                            sprintf(s, "(%d, %d, %d)", sht->msgs, mx, ((int*)sht->msgs)[0]);
-                                            putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_000000, s, strlen(s));
+                                            // sprintf(s, "(%d, %d, %d)", sht->msgs, mx, ((struct MOUSE_WINDOWS_Info *)sht->msgs)->dx);
+                                            // putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_000000, s, strlen(s));
                                         }
                                         
                                         break;
@@ -307,8 +325,58 @@ void HariMain(void)
                             sheet_slide(sht, new_wx, new_wy); 
                             new_wx = 0x7fffffff;
                         }
+                        mw_info.status = 0;
                     }
                 }
+                if (key_win) {
+                    int dx = mx - key_win->vx0;
+                    int dy = my - key_win->vy0;
+                    if (0 <= dx && dx <= key_win->bxsize && 0 <= dy && dy <= key_win->bysize && key_win->msgs) {
+                        mw_info.mx = mx;
+                        mw_info.my = my;
+                        mw_info.wx = key_win->vx0;
+                        mw_info.wy = key_win->vy0;
+                        mw_info.dx = dx;
+                        mw_info.dy = dy;
+                        // mw_info.status = 0;
+
+                        for (size_t i = 0; i < sizeof(mw_info); i++) {
+                            ((char*)key_win->msgs)[i] = ((char*)&mw_info)[i];
+                        }
+                    }
+                }
+                if (prev_Mouse_Vis ^ Mouse_Vis)
+                {
+                    init_mouse_cursor8(buf_mouse, 99);
+                    prev_Mouse_Vis = Mouse_Vis;
+                }
+
+                int bar_width;
+                int bar_x, bar_bottom = 5;
+
+                bar_width = binfo->scrnx * 4 / 5;
+                bar_x = binfo->scrnx / 10;
+                if (bar_x + 10 <= mx && mx <= bar_x + 60 && binfo->scrny - 40 - bar_bottom <= my && my <= binfo->scrny - 14 - bar_bottom) {
+                    radius_box_fill(sht_back->buf, sht_back->bxsize, 7, bar_x, binfo->scrny - 200 - bar_bottom, bar_x + 300, binfo->scrny - 60 - bar_bottom, 20);
+                    // putfonts8_asc_sht(sht_back, bar_x + 30, binfo->scrny - 80 - bar_bottom, 0, 7, s, strlen(s));
+                    char AUTHOR[] = {11, 12, 13, 0};
+                    char XBN[] = {14, 15, 16, 0};
+                    char ZHL[] = {17, 18, 19, 0};
+                    char CY[] = {20, 3, 21, 0};
+
+                    putfonts16_chn(sht_back->buf, sht_back->bxsize, bar_x + 30, binfo->scrny - 180 - bar_bottom, 0, AUTHOR);
+                    putfonts16_chn(sht_back->buf, sht_back->bxsize, bar_x + 50, binfo->scrny - 150 - bar_bottom, 0, XBN);
+                    putfonts16_chn(sht_back->buf, sht_back->bxsize, bar_x + 50, binfo->scrny - 130 - bar_bottom, 0, ZHL);
+                    putfonts16_chn(sht_back->buf, sht_back->bxsize, bar_x + 50, binfo->scrny - 110 - bar_bottom, 0, CY);
+
+                    putfonts8_asc(sht_back->buf, sht_back->bxsize, bar_x + 140, binfo->scrny - 130 - bar_bottom, 0, "ZZULI CS 1801");
+                    sheet_refresh(sht_back, bar_x, binfo->scrny - 200 - bar_bottom, bar_x + 300, binfo->scrny - 50 - bar_bottom);
+                }else{
+                    radius_box_fill(sht_back->buf, sht_back->bxsize, GET_COLOR(0xC3, 0x52, 0x30), bar_x, binfo->scrny - 200 - bar_bottom, bar_x + 300, binfo->scrny - 60 - bar_bottom, 20);
+                    sheet_refresh(sht_back, bar_x, binfo->scrny - 200 - bar_bottom, bar_x + 300, binfo->scrny - 50 - bar_bottom);
+                }
+
+
             } else if (768 <= i && i <= 1023) { 
                 close_console(shtctl->sheets0 + (i - 768));
             } else if (1024 <= i && i <= 2023) {
@@ -369,7 +437,7 @@ struct SHEET* open_console(struct SHTCTL* shtctl, unsigned int memtotal)
     struct MEMMAN* memman = (struct MEMMAN*)MEMMAN_ADDR;
     struct SHEET* sht = sheet_alloc(shtctl);
     unsigned char* buf = (unsigned char*)memman_alloc_4k(memman, CONSOLE_W * CONSOLE_H);
-    sheet_setbuf(sht, buf, CONSOLE_W, CONSOLE_H, -1); 
+    sheet_setbuf(sht, buf, CONSOLE_W, CONSOLE_H, 255);
     make_window8(buf, CONSOLE_W, CONSOLE_H, "console", 0);
     make_textbox8(sht, 8, 28, CONSOLE_W - 16, CONSOLE_H - 56, COL8_000000);
     sht->task = open_constask(sht, memtotal);

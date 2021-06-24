@@ -56,7 +56,9 @@ void arc_fill(unsigned char* vram, int xsize, unsigned char c, int x0, int y0, i
 void radius_box_fill(unsigned char* vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1, int radius);
 void init_screen8(char *vram, int x, int y);
 void putfont8(char *vram, int xsize, int x, int y, char c, char *font);
-void putfonts8_asc(char *vram, int xsize, int x, int y, char c, unsigned char *s);
+void putfont16(char* vram, int xsize, int x, int y, char c, short* font);
+void putfonts16_chn(char* vram, int xsize, int x, int y, char c, unsigned char* s);
+void putfonts8_asc(char* vram, int xsize, int x, int y, char c, unsigned char* s);
 void init_mouse_cursor8(char *mouse, char bc);
 void putblock8_8(char *vram, int vxsize, int pxsize,
 	int pysize, int px0, int py0, char *buf, int bxsize);
@@ -288,3 +290,7 @@ struct FILEINFO* file_search(char* name, struct FILEINFO* finfo, int max);
 /* bootpack.c */
 struct TASK* open_constask(struct SHEET* sht, unsigned int memtotal);
 struct SHEET* open_console(struct SHTCTL* shtctl, unsigned int memtotal);
+
+extern char Mouse_Vis;
+
+#define GET_COLOR(r, g, b) 16+((r)/43)+((g)/43)*6+((b)/43)*36

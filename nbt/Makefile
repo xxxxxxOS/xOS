@@ -1,4 +1,4 @@
-APP      = star1
+APP      = nbt
 STACK    = 1k
 MALLOC   = 47k
 

@@ -6,7 +6,7 @@ void HariMain(void)
 	int win, x, y, r, g, b;
 	api_initmalloc();
 	buf = api_malloc(144 * 164);
-	win = api_openwin(buf, 144, 164, -1, "color");
+	win = api_openwin(buf, 144, 164, 255, "color");
 	for (y = 0; y < 128; y++) {
 		for (x = 0; x < 128; x++) {
 			r = x * 2;
@@ -16,6 +16,6 @@ void HariMain(void)
 		}
 	}
 	api_refreshwin(win, 8, 28, 136, 156);
-	api_getkey(1); /* ‚Ä‚«‚Æ‚¤‚ÈƒL[“ü—Í‚ð‘Ò‚Â */
+	api_getkey(1); /* ï¿½Ä‚ï¿½ï¿½Æ‚ï¿½ï¿½ÈƒLï¿½[ï¿½ï¿½ï¿½Í‚ï¿½Ò‚ï¿½ */
 	api_end();
 }
