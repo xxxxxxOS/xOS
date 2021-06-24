@@ -2,6 +2,7 @@
 
 #include "bootpack.h"
 
+
 void init_palette(void)
 {
     static unsigned char table_rgb[16 * 3] = {
@@ -115,7 +116,7 @@ void init_screen8(char* vram, int x, int y)
     radius_box_fill(vram, xsize, COL8_C6C6C6, bar_x, ysize - 50, xsize - 1 - bar_x, ysize - 4, 10);
 
     radius_box_fill(vram, xsize, COL8_FFFFFF, bar_x + 10, ysize - 40, bar_x + 60, ysize - 14, 4);
-
+    putfonts16_chn(vram, xsize, bar_x + 18, ysize - 35, 0, "\1\2");
     return;
 }
 
@@ -126,14 +127,37 @@ void putfont8(char* vram, int xsize, int x, int y, char c, char* font)
     for (i = 0; i < 16; i++) {
         p = vram + (y + i) * xsize + x;
         d = font[i];
-        if ((d & 0x80) != 0) p[0] = c;
-        if ((d & 0x40) != 0) p[1] = c;
-        if ((d & 0x20) != 0) p[2] = c;
-        if ((d & 0x10) != 0) p[3] = c;
-        if ((d & 0x08) != 0) p[4] = c;
-        if ((d & 0x04) != 0) p[5] = c;
-        if ((d & 0x02) != 0) p[6] = c;
-        if ((d & 0x01) != 0) p[7] = c;
+        for (int j = 0; j < 8; j++)
+            if ((d & (0x01 << j)) != 0)
+                p[7 - j] = c;
+    }
+    return;
+}
+
+void putfont16(char* vram, int xsize, int x, int y, char c, short* font)
+{
+    int i;
+    char* p;
+    short d /* data */;
+    for (i = 0; i < 16; i++) {
+        p = vram + (y + i) * xsize + x;
+        d = font[i];
+        for (int j = 0; j < 8; j++)
+            if ((d & (0x01 << j)) != 0)
+                p[7 - j] = c;
+        for (int j = 8; j < 16; j++)
+            if ((d & (0x01 << j)) != 0)
+                p[23 - j] = c;
+    }
+    return;
+}
+
+void putfonts16_chn(char* vram, int xsize, int x, int y, char c, unsigned char* s)
+{
+    extern char Chinese[];
+    for (; *s != 0x00; s++) {
+        putfont16(vram, xsize, x, y, c, Chinese + (*s - 1) * 32);
+        x += 16;
     }
     return;
 }

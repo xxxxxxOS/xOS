@@ -1,6 +1,6 @@
 OBJS_BOOTPACK = bootpack.obj naskfunc.obj hankaku.obj graphic.obj dsctbl.obj  \
 		int.obj fifo.obj keyboard.obj mouse.obj memory.obj sheet.obj console.obj \
-		mtask.obj window.obj timer.obj file.obj
+		mtask.obj window.obj timer.obj file.obj chn_font.obj
 	
 TOOLPATH = ../../z_tools/
 INCPATH  = ../../z_tools/haribote/

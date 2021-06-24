@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.html": "html",
+        "*.cjson": "jsonc",
+        "*.wxss": "css",
+        "*.wxs": "javascript",
+        "*.nas": "platformio-debug.asm",
+        "bootpack.h": "c"
+    }
+}
