@@ -1,5 +1,6 @@
 #include "bootpack.h"
 #include <stdio.h>
+#include <string.h>
 
 #define KEYCMD_LED 0xed
 
@@ -276,8 +277,17 @@ void HariMain(void)
                                                 fifo32_put(&task->fifo, 4);
                                                 io_sti();
                                             }
+                                        }else{
+                                            // TODO 窗口的鼠标事件
+                                            if (sht->msgs!=0)
+                                            {
+                                                ((int *)sht->msgs)[0] = mx;
+                                                write_mem8(sht->msgs, mx);
+                                            }
+                                            sprintf(s, "(%d, %d, %d)", sht->msgs, mx, ((int*)sht->msgs)[0]);
+                                            putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_000000, s, strlen(s));
                                         }
-                                        // TODO
+                                        
                                         break;
                                     }
                                 }
@@ -306,7 +316,7 @@ void HariMain(void)
             } else if (2024 <= i && i <= 2279) {
                 sht2 = shtctl->sheets0 + (i - 2024);
                 memman_free_4k(memman, (int)sht2->buf, 256 * 165);
-                sheet_free(sht2);
+                sheet_free(sht2); 
             }
         }
     }

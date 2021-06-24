@@ -22,6 +22,7 @@ struct SHTCTL *shtctl_init(struct MEMMAN *memman, unsigned char *vram, int xsize
 	for (i = 0; i < MAX_SHEETS; i++) {
 		ctl->sheets0[i].flags = 0; /*未使用标记*/
         ctl->sheets0[i].ctl = ctl; /*记录所属*/
+        ctl->sheets0[i].msgs = 0; /*记录所属*/
     }
 err:
 	return ctl;
