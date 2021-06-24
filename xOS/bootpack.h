@@ -288,3 +288,5 @@ struct FILEINFO* file_search(char* name, struct FILEINFO* finfo, int max);
 /* bootpack.c */
 struct TASK* open_constask(struct SHEET* sht, unsigned int memtotal);
 struct SHEET* open_console(struct SHTCTL* shtctl, unsigned int memtotal);
+
+extern char Mouse_Vis;

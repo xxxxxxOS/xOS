@@ -10,6 +10,9 @@ void keywin_on(struct SHEET* key_win);
 void close_console(struct SHEET* sht);
 void close_constask(struct TASK* task);
 
+char prev_Mouse_Vis = 1;
+char Mouse_Vis = 1;
+
 void HariMain(void)
 {
     struct BOOTINFO* binfo = (struct BOOTINFO*)ADR_BOOTINFO;
@@ -340,6 +343,12 @@ void HariMain(void)
                         }
                     }
                 }
+                if (prev_Mouse_Vis ^ Mouse_Vis)
+                {
+                    init_mouse_cursor8(buf_mouse, 99);
+                    prev_Mouse_Vis = Mouse_Vis;
+                }
+                
             } else if (768 <= i && i <= 1023) { 
                 close_console(shtctl->sheets0 + (i - 768));
             } else if (1024 <= i && i <= 2023) {

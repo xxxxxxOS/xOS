@@ -173,13 +173,18 @@ void init_mouse_cursor8(char* mouse, char bc)
     for (y = 0; y < 16; y++) {
         for (x = 0; x < 16; x++) {
             index = y * 16 + x;
-            if (cursor[y][x] == '*') {
-                mouse[index] = COL8_000000;
-            }
-            if (cursor[y][x] == 'O') {
-                mouse[index] = COL8_FFFFFF;
-            }
-            if (cursor[y][x] == '.') {
+            if (Mouse_Vis)
+            {
+                if (cursor[y][x] == '*') {
+                    mouse[index] = COL8_000000;
+                }
+                if (cursor[y][x] == 'O') {
+                    mouse[index] = COL8_FFFFFF;
+                }
+                if (cursor[y][x] == '.') {
+                    mouse[index] = bc;
+                }
+            }else{
                 mouse[index] = bc;
             }
         }

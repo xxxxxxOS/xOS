@@ -418,7 +418,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 		sht->task = task;
 		sht->flags |= 0x10;
 		sheet_setbuf(sht, (char *) ebx + ds_base, esi, edi, eax);
-		make_window8((char *) ebx + ds_base, esi, edi, (char *) ecx + ds_base, 1);
+		make_window8((char *) ebx + ds_base, esi, edi, (char *) ecx + ds_base, 0);
 		sheet_slide(sht, ((shtctl->xsize - esi) / 2) & ~3, (shtctl->ysize - edi) / 2);
 		sheet_updown(sht, shtctl->top); 
 		reg[7] = (int) sht;
@@ -521,7 +521,15 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	}else if (edx == 21) {
 		sht = (struct SHEET *) (ebx & 0xfffffffe);
 		sht->msgs = ds_base + esi;
-	} 
+	} else if(edx == 22) {
+		Mouse_Vis = ebx;
+	} else if (edx == 23) {
+		sht = (struct SHEET *) (ebx & 0xfffffffe);
+		radius_box_fill(sht->buf, sht->bxsize, ebp >> 16, eax, ecx, esi, edi, ebp & (0x0000FFFF));
+		if ((ebx & 1) == 0) {
+			sheet_refresh(sht, eax, ecx, esi + 1, edi + 1);
+		}
+	}
 	return 0;
 }
 
