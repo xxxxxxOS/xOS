@@ -520,7 +520,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 		}
 	}else if (edx == 21) {
 		sht = (struct SHEET *) (ebx & 0xfffffffe);
-		sht->msgs = esi;
+		sht->msgs = ds_base + esi;
 	} 
 	return 0;
 }

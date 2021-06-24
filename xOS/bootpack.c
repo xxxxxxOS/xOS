@@ -282,7 +282,7 @@ void HariMain(void)
                                             if (sht->msgs!=0)
                                             {
                                                 ((int *)sht->msgs)[0] = mx;
-                                                write_mem8(sht->msgs, mx);
+                                                // write_mem8(sht->msgs, mx);
                                             }
                                             sprintf(s, "(%d, %d, %d)", sht->msgs, mx, ((int*)sht->msgs)[0]);
                                             putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_000000, s, strlen(s));
