@@ -14,7 +14,7 @@ void HariMain(void)
 
     api_initmalloc();
     buf = api_malloc(100 * 100);
-    win = api_openwin(buf, 100, 100, 255, "star1");
+    win = api_openwin(buf, 100, 100, 255, "New Bttn");
     api_wincallback(win, &msgs);
 
     for (;;) {

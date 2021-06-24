@@ -11,14 +11,14 @@ default :
 	$(MAKE) xOS.img
 
 xOS.img : xOS/ipl.bin xOS/xOS.sys Makefile \
-			star1/star1.hrb \
+			nbt/nbt.hrb \
 			color/color.hrb 
 	$(EDIMG)   imgin:../z_tools/fdimg0at.tek \
 		wbinimg src:xOS/ipl.bin len:512 from:0 to:0 \
 		copy from:xOS/xOS.sys to:@: \
 		copy from:xOS/ipl.nas to:@: \
 		copy from:make.bat to:@: \
-		copy from:star1/star1.hrb to:@: \
+		copy from:nbt/nbt.hrb to:@: \
 		copy from:color/color.hrb to:@: \
 		imgout:xOS.img
 
@@ -35,7 +35,7 @@ install :
 full :
 	$(MAKE) -C xOS
 	$(MAKE) -C apilib
-	$(MAKE) -C star1
+	$(MAKE) -C nbt
 	$(MAKE) -C color
 	$(MAKE) xOS.img
 
@@ -62,13 +62,13 @@ src_only :
 clean_full :
 	$(MAKE) -C xOS		clean
 	$(MAKE) -C apilib		clean
-	$(MAKE) -C star1		clean
+	$(MAKE) -C nbt		clean
 	$(MAKE) -C color		clean
 
 src_only_full :
 	$(MAKE) -C xOS			src_only
 	$(MAKE) -C apilib		src_only
-	$(MAKE) -C star1		src_only
+	$(MAKE) -C nbt		src_only
 	$(MAKE) -C color		src_only
 	-$(DEL) xOS.img
 
