@@ -5,32 +5,28 @@
 void callback();
 
 int win;
-char* msgs;
+struct MOUSE_WINDOWS_Info msgs;
 
 void HariMain(void)
 {
     char* buf;
-    
 
     api_initmalloc();
-    buf = api_malloc(150 * 100);
-    msgs = api_malloc(4);
-    win = api_openwin(buf, 150, 100, -1, "star1");
-    api_wincallback(win, msgs);
-    api_boxfilwin(win, 6, 26, 143, 93, 8);
-    api_point(win, 75, 59, 3);
+    buf = api_malloc(180 * 100);
+    win = api_openwin(buf, 180, 100, 255, "star1");
+    api_wincallback(win, &msgs);
+    // api_boxfilwin(win, 6, 26, 143, 93, 7);
+    // api_point(win, 75, 59, 3);
     for (;;) {
         callback();
-        // if (api_getkey(1) == 0x0a) {
-        //     break;
-        // }
     }
     api_end();
 }
 int i = 0;
 void callback()
 {
-    char str[20];
-    sprintf(str, "%d %d", ((int*)msgs)[0], msgs[1]);
+    char str[30];
+    sprintf(str, "%d %d", msgs.dx, msgs.dy);
+    // api_boxfilwin(win, 10, 30, 80, 60, 9); 
     api_putstrwin(win, 10, 30, 6, strlen(str), str);
 }

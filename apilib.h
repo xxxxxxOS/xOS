@@ -19,3 +19,11 @@ void api_settimer(int timer, int time);
 void api_freetimer(int timer);
 void api_beep(int tone);
 void api_wincallback(int win, char* msgs);
+
+struct MOUSE_WINDOWS_Info
+{
+    int wx, wy;
+    int mx, my;
+    int dx, dy;
+    int status;
+};

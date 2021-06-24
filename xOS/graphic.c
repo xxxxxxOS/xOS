@@ -68,11 +68,16 @@ void boxfill8(unsigned char* vram, int xsize, unsigned char c, int x0, int y0, i
 
 void circle_fill(unsigned char* vram, int xsize, unsigned char c, int x0, int y0, int radius)
 {
-    double x, y;
-    for (y = -radius * 2; y <= radius * 2; y += 1) {
-        for (x = -radius * 2; x <= radius * 2; x += 1)
+    int x, y;
+    int index;
+    for (y = -radius; y <= radius; y += 1) {
+        for (x = -radius; x <= radius; x += 1)
             if (x * x + y * y <= radius * radius) {
-                vram[(int)(y + y0) * xsize + (int)x + x0] = c;
+                index = (int)(y + y0) * xsize + (int)x + x0;
+                if (index >= 0)
+                {
+                    vram[index] = c;
+                }
             }
     }
     return;

@@ -1,4 +1,5 @@
 #include "bootpack.h"
+#include "../apilib.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -24,6 +25,9 @@ void HariMain(void)
     struct SHEET *sht_back, *sht_mouse;
     struct TASK *task_a, *task;
     int last_key_win_loc[2] = { 32, 16 };
+
+    struct MOUSE_WINDOWS_Info mw_info;
+
     static char keytable0[0x80] = {
         0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^', 0x08, 0,
         'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[', 0x0a, 0, 'A', 'S',
@@ -258,7 +262,7 @@ void HariMain(void)
                                             mmx2 = sht->vx0;
                                             new_wy = sht->vy0;
                                         }
-                                        if (sht->bxsize - 21 <= x && x < sht->bxsize - 5 && 5 <= y && y < 19) {
+                                        if (4 <= x && x < 20 && 5 <= y && y < 19) {
                                             if ((sht->flags & 0x10) != 0) { 
                                                 task = sht->task;
                                                 cons_putstr0(task->cons, "\nBreak(mouse) :\n");
@@ -281,10 +285,20 @@ void HariMain(void)
                                             // TODO 窗口的鼠标事件
                                             if (sht->msgs!=0)
                                             {
-                                                ((int *)sht->msgs)[0] = mx;
-                                                // write_mem8(sht->msgs, mx);
+
+                                                mw_info.mx = mx;
+                                                mw_info.my = my;
+                                                mw_info.wx = sht->vx0;
+                                                mw_info.wy = sht->vy0;
+                                                mw_info.dx = x;
+                                                mw_info.dy = y;
+                                                mw_info.status = 1;
+
+                                                for (size_t i = 0; i < sizeof(mw_info); i++) {
+                                                    ((char*)sht->msgs)[i] = ((char *)&mw_info)[i];
+                                                }
                                             }
-                                            sprintf(s, "(%d, %d, %d)", sht->msgs, mx, ((int*)sht->msgs)[0]);
+                                            sprintf(s, "(%d, %d, %d)", sht->msgs, mx, ((struct MOUSE_WINDOWS_Info *)sht->msgs)->dx);
                                             putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_000000, s, strlen(s));
                                         }
                                         
@@ -306,6 +320,23 @@ void HariMain(void)
                         if (new_wx != 0x7fffffff) {
                             sheet_slide(sht, new_wx, new_wy); 
                             new_wx = 0x7fffffff;
+                        }
+                    }
+                }
+                if (key_win) {
+                    int dx = mx - key_win->vx0;
+                    int dy = my - key_win->vy0;
+                    if (0 <= dx && dx <= key_win->bxsize && 0 <= dy && dy <= key_win->bysize && key_win->msgs) {
+                        mw_info.mx = mx;
+                        mw_info.my = my;
+                        mw_info.wx = key_win->vx0;
+                        mw_info.wy = key_win->vy0;
+                        mw_info.dx = dx;
+                        mw_info.dy = dy;
+                        mw_info.status = 0;
+
+                        for (size_t i = 0; i < sizeof(mw_info); i++) {
+                            ((char*)key_win->msgs)[i] = ((char*)&mw_info)[i];
                         }
                     }
                 }
@@ -369,7 +400,7 @@ struct SHEET* open_console(struct SHTCTL* shtctl, unsigned int memtotal)
     struct MEMMAN* memman = (struct MEMMAN*)MEMMAN_ADDR;
     struct SHEET* sht = sheet_alloc(shtctl);
     unsigned char* buf = (unsigned char*)memman_alloc_4k(memman, CONSOLE_W * CONSOLE_H);
-    sheet_setbuf(sht, buf, CONSOLE_W, CONSOLE_H, -1); 
+    sheet_setbuf(sht, buf, CONSOLE_W, CONSOLE_H, 255);
     make_window8(buf, CONSOLE_W, CONSOLE_H, "console", 0);
     make_textbox8(sht, 8, 28, CONSOLE_W - 16, CONSOLE_H - 56, COL8_000000);
     sht->task = open_constask(sht, memtotal);
