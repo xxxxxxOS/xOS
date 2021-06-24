@@ -11,6 +11,7 @@ struct BOOTINFO { /* 0x0ff0-0x0fff */
 #define ADR_DISKIMG 	0x00100000
 
 /* naskfunc.nas */
+void write_mem8(int addr, int data);
 void io_hlt(void);
 void io_cli(void);
 void io_sti(void);
@@ -155,10 +156,11 @@ unsigned int memman_alloc_4k(struct MEMMAN *man, unsigned int size);
 int memman_free_4k(struct MEMMAN *man, unsigned int addr, unsigned int size);
 
 /* sheet.c */
-#define MAX_SHEETS		256
+#define MAX_SHEETS		2560
 struct SHEET {
 	unsigned char *buf;
 	int bxsize, bysize, vx0, vy0, col_inv, height, flags;
+    char *msgs;
     struct SHTCTL* ctl;
     struct TASK* task;
 };

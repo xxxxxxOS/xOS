@@ -1,5 +1,6 @@
 #include "bootpack.h"
 #include <stdio.h>
+#include <string.h>
 
 #define KEYCMD_LED 0xed
 
@@ -22,6 +23,7 @@ void HariMain(void)
     unsigned char *buf_back, buf_mouse[256];
     struct SHEET *sht_back, *sht_mouse;
     struct TASK *task_a, *task;
+    int last_key_win_loc[2] = { 32, 16 };
     static char keytable0[0x80] = {
         0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^', 0x08, 0,
         'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[', 0x0a, 0, 'A', 'S',
@@ -54,8 +56,8 @@ void HariMain(void)
     init_pit();
     init_keyboard(&fifo, 256);
     enable_mouse(&fifo, 512, &mdec);
-    io_out8(PIC0_IMR, 0xf8); /* PIC1˜a???‰Â(11111001)*/
-    io_out8(PIC1_IMR, 0xef); /*ˆò?‘l?(11101111)*/
+    io_out8(PIC0_IMR, 0xf8); /* PIC1é”®ç›˜(11111001)*/
+    io_out8(PIC1_IMR, 0xef); /*é¼ æ ‡(11101111)*/
     fifo32_init(&keycmd, 32, keycmd_buf, 0);
 
     memtotal = memtest(0x00400000, 0xbfffffff);
@@ -77,7 +79,8 @@ void HariMain(void)
     init_screen8(buf_back, binfo->scrnx, binfo->scrny);
 
     /* sht_cons */
-    key_win = open_console(shtctl, memtotal);
+    // key_win = open_console(shtctl, memtotal);
+    key_win = 0;
 
     /* sht_mouse */
     sht_mouse = sheet_alloc(shtctl);
@@ -87,12 +90,12 @@ void HariMain(void)
     my = (binfo->scrny - 28 - 16) / 2;
 
     sheet_slide(sht_back, 0, 0);
-    sheet_slide(key_win, 32, 4);
+    // sheet_slide(key_win, 32, 4);
     sheet_slide(sht_mouse, mx, my);
     sheet_updown(sht_back, 0);
-    sheet_updown(key_win, 1);
+    // sheet_updown(key_win, 1);
     sheet_updown(sht_mouse, 2);
-    keywin_on(key_win);
+    // keywin_on(key_win);
 
     fifo32_put(&keycmd, KEYCMD_LED);
     fifo32_put(&keycmd, key_leds);
@@ -105,7 +108,6 @@ void HariMain(void)
         }
         io_cli();
         if (fifo32_status(&fifo) == 0) {
-            
             if (new_mx >= 0) {
                 io_sti();
                 sheet_slide(sht_mouse, new_mx - 8, new_my - 8);
@@ -156,16 +158,16 @@ void HariMain(void)
                     key_win = shtctl->sheets[j];
                     keywin_on(key_win);
                 }
-                if (i == 256 + 0x2a) { /* ¶ˆÚ ON */
+                if (i == 256 + 0x2a) { /* å·¦ç§» ON */
                     key_shift |= 1;
                 }
-                if (i == 256 + 0x36) { /* ‰EˆÚ ON */
+                if (i == 256 + 0x36) { /* å³ç§» ON */
                     key_shift |= 2;
                 }
-                if (i == 256 + 0xaa) { /* ¶ˆÚ OFF */
+                if (i == 256 + 0xaa) { /* å·¦ç§» OFF */
                     key_shift &= ~1;
                 }
-                if (i == 256 + 0xb6) { /* ‰EˆÚ OFF */
+                if (i == 256 + 0xb6) { /* å³ç§» OFF */
                     key_shift &= ~2;
                 }
                 if (i == 256 + 0x3a) { /* CapsLock */
@@ -200,9 +202,12 @@ void HariMain(void)
                         keywin_off(key_win);
                     }
                     key_win = open_console(shtctl, memtotal);
-                    sheet_slide(key_win, 32, 4);
+                    sheet_slide(key_win, last_key_win_loc[0], last_key_win_loc[1]);
                     sheet_updown(key_win, shtctl->top);
                     keywin_on(key_win);
+
+                    last_key_win_loc[0] = (last_key_win_loc[0] + 16) % (binfo->scrnx / 5 * 4);
+                    last_key_win_loc[1] = (last_key_win_loc[1] + 16) % (binfo->scrny / 5 * 4);
                 }
                 if (i == 256 + 0x57) { /* F11 */
                     sheet_updown(shtctl->sheets[1], shtctl->top - 1);
@@ -254,7 +259,6 @@ void HariMain(void)
                                             new_wy = sht->vy0;
                                         }
                                         if (sht->bxsize - 21 <= x && x < sht->bxsize - 5 && 5 <= y && y < 19) {
-                                            
                                             if ((sht->flags & 0x10) != 0) { 
                                                 task = sht->task;
                                                 cons_putstr0(task->cons, "\nBreak(mouse) :\n");
@@ -273,7 +277,17 @@ void HariMain(void)
                                                 fifo32_put(&task->fifo, 4);
                                                 io_sti();
                                             }
+                                        }else{
+                                            // TODO çª—å£çš„é¼ æ ‡äº‹ä»¶
+                                            if (sht->msgs!=0)
+                                            {
+                                                ((int *)sht->msgs)[0] = mx;
+                                                // write_mem8(sht->msgs, mx);
+                                            }
+                                            sprintf(s, "(%d, %d, %d)", sht->msgs, mx, ((int*)sht->msgs)[0]);
+                                            putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_000000, s, strlen(s));
                                         }
+                                        
                                         break;
                                     }
                                 }
@@ -302,7 +316,7 @@ void HariMain(void)
             } else if (2024 <= i && i <= 2279) {
                 sht2 = shtctl->sheets0 + (i - 2024);
                 memman_free_4k(memman, (int)sht2->buf, 256 * 165);
-                sheet_free(sht2);
+                sheet_free(sht2); 
             }
         }
     }
