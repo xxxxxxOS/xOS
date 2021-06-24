@@ -327,16 +327,6 @@ void HariMain(void)
                         }
                         mw_info.status = 0;
                     }
-                    if ((mdec.btn & 0x01) != 0) {
-                        int bar_width;
-                        int bar_x, bar_bottom = 5;
-
-                        bar_width = 0.8 * binfo->scrnx;
-                        bar_x = 0.1 * binfo->scrnx;
-                        if (bar_x + 10 <= x && x <= bar_x + 60 && binfo->scrny - 40 - bar_bottom <= y && y <= binfo->scrny - 14 - bar_bottom) {
-                            
-                        }
-                    }
                 }
                 if (key_win) {
                     int dx = mx - key_win->vx0;
@@ -360,7 +350,33 @@ void HariMain(void)
                     init_mouse_cursor8(buf_mouse, 99);
                     prev_Mouse_Vis = Mouse_Vis;
                 }
-                
+
+                int bar_width;
+                int bar_x, bar_bottom = 5;
+
+                bar_width = binfo->scrnx * 4 / 5;
+                bar_x = binfo->scrnx / 10;
+                if (bar_x + 10 <= mx && mx <= bar_x + 60 && binfo->scrny - 40 - bar_bottom <= my && my <= binfo->scrny - 14 - bar_bottom) {
+                    radius_box_fill(sht_back->buf, sht_back->bxsize, 7, bar_x, binfo->scrny - 200 - bar_bottom, bar_x + 300, binfo->scrny - 60 - bar_bottom, 20);
+                    // putfonts8_asc_sht(sht_back, bar_x + 30, binfo->scrny - 80 - bar_bottom, 0, 7, s, strlen(s));
+                    char AUTHOR[] = {11, 12, 13, 0};
+                    char XBN[] = {14, 15, 16, 0};
+                    char ZHL[] = {17, 18, 19, 0};
+                    char CY[] = {20, 3, 21, 0};
+
+                    putfonts16_chn(sht_back->buf, sht_back->bxsize, bar_x + 30, binfo->scrny - 180 - bar_bottom, 0, AUTHOR);
+                    putfonts16_chn(sht_back->buf, sht_back->bxsize, bar_x + 50, binfo->scrny - 150 - bar_bottom, 0, XBN);
+                    putfonts16_chn(sht_back->buf, sht_back->bxsize, bar_x + 50, binfo->scrny - 130 - bar_bottom, 0, ZHL);
+                    putfonts16_chn(sht_back->buf, sht_back->bxsize, bar_x + 50, binfo->scrny - 110 - bar_bottom, 0, CY);
+
+                    putfonts8_asc(sht_back->buf, sht_back->bxsize, bar_x + 140, binfo->scrny - 130 - bar_bottom, 0, "ZZULI CS 1801");
+                    sheet_refresh(sht_back, bar_x, binfo->scrny - 200 - bar_bottom, bar_x + 300, binfo->scrny - 50 - bar_bottom);
+                }else{
+                    radius_box_fill(sht_back->buf, sht_back->bxsize, GET_COLOR(0xC3, 0x52, 0x30), bar_x, binfo->scrny - 200 - bar_bottom, bar_x + 300, binfo->scrny - 60 - bar_bottom, 20);
+                    sheet_refresh(sht_back, bar_x, binfo->scrny - 200 - bar_bottom, bar_x + 300, binfo->scrny - 50 - bar_bottom);
+                }
+
+
             } else if (768 <= i && i <= 1023) { 
                 close_console(shtctl->sheets0 + (i - 768));
             } else if (1024 <= i && i <= 2023) {
