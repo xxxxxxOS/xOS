@@ -102,21 +102,36 @@ void init_screen8(char* vram, int x, int y)
 {
     int xsize = x, ysize = y;
     int bar_width;
-    int bar_x;
+    int bar_x, bar_bottom = 5;
 
     bar_width = 0.8 * xsize;
     bar_x = 0.1 * xsize;
 
-    boxfill8(vram, xsize, COL8_008484, 0, 0, xsize, ysize);
+    boxfill8(vram, xsize, GET_COLOR(0xC3, 0x52, 0x30), 0, 0, xsize, ysize);
+    
+    // boxfill8(vram, xsize, COL8_FFFF00, 30, 50, 80, 100);
+    // radius_box_fill(vram, xsize, COL8_C6C6C6, 10, 10, 30, 20, 5);
+    // circle_fill(vram, xsize, COL8_C6C6C6, 100, 50, 10);
 
-    boxfill8(vram, xsize, COL8_FFFF00, 30, 50, 80, 100);
-    radius_box_fill(vram, xsize, COL8_C6C6C6, 10, 10, 30, 20, 5);
-    circle_fill(vram, xsize, COL8_C6C6C6, 100, 50, 10);
+    boxfill8(vram, xsize, 7, 0, 0, xsize, 24);
+    putfonts8_asc(vram, xsize, 20, 5, 0, "( xOS )");
+    putfonts8_asc(vram, xsize, 450, 5, 0, "<< 9:20 AM >>");
 
-    radius_box_fill(vram, xsize, COL8_C6C6C6, bar_x, ysize - 50, xsize - 1 - bar_x, ysize - 4, 10);
+    radius_box_fill(vram, xsize, 7, bar_x - 2, ysize - 46 - bar_bottom, xsize + 1 - bar_x, ysize - 2 - bar_bottom, 10); //开始菜单长条
+    radius_box_fill(vram, xsize, COL8_C6C6C6, bar_x, ysize - 50 - bar_bottom, xsize - 1 - bar_x, ysize - 4 - bar_bottom, 10);
 
-    radius_box_fill(vram, xsize, COL8_FFFFFF, bar_x + 10, ysize - 40, bar_x + 60, ysize - 14, 4);
-    putfonts16_chn(vram, xsize, bar_x + 18, ysize - 35, 0, "\1\2");
+    radius_box_fill(vram, xsize, 7, bar_x + 68, ysize - 47 - bar_bottom, xsize - 12 - bar_x, ysize - 11 - bar_bottom, 6); //开始菜单旁边的装饰物
+    radius_box_fill(vram, xsize, 0, bar_x + 72, ysize - 43 - bar_bottom, xsize - 8 - bar_x, ysize - 7 - bar_bottom, 6);
+    radius_box_fill(vram, xsize, 15, bar_x + 70, ysize - 45 - bar_bottom, xsize - 10 - bar_x, ysize - 9 - bar_bottom, 6);
+
+    radius_box_fill(vram, xsize, 0, bar_x + 12, ysize - 37 - bar_bottom, bar_x + 62, ysize - 12 - bar_bottom, 4);
+    radius_box_fill(vram, xsize, COL8_FFFFFF, bar_x + 10, ysize - 40 - bar_bottom, bar_x + 60, ysize - 14 - bar_bottom, 4);
+    putfonts16_chn(vram, xsize, bar_x + 18 + 1, ysize - 34 - bar_bottom, 15, "\1\2");
+    putfonts16_chn(vram, xsize, bar_x + 18, ysize - 35 - bar_bottom, 0, "\1\2");
+
+    char good_morning[] = { 4, 5, 6, 7, 8, 9, 10, 0 };
+   
+    putfonts16_chn(vram, xsize, bar_x + 400, ysize - 35 - bar_bottom, 7, good_morning);
     return;
 }
 
@@ -157,7 +172,7 @@ void putfonts16_chn(char* vram, int xsize, int x, int y, char c, unsigned char* 
     extern char Chinese[];
     for (; *s != 0x00; s++) {
         putfont16(vram, xsize, x, y, c, Chinese + (*s - 1) * 32);
-        x += 16;
+        x += 18;
     }
     return;
 }

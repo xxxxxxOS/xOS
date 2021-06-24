@@ -292,3 +292,5 @@ struct TASK* open_constask(struct SHEET* sht, unsigned int memtotal);
 struct SHEET* open_console(struct SHTCTL* shtctl, unsigned int memtotal);
 
 extern char Mouse_Vis;
+
+#define GET_COLOR(r, g, b) 16+((r)/43)+((g)/43)*6+((b)/43)*36

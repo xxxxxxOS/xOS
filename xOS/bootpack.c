@@ -301,8 +301,8 @@ void HariMain(void)
                                                     ((char*)sht->msgs)[i] = ((char *)&mw_info)[i];
                                                 }
                                             }
-                                            sprintf(s, "(%d, %d, %d)", sht->msgs, mx, ((struct MOUSE_WINDOWS_Info *)sht->msgs)->dx);
-                                            putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_000000, s, strlen(s));
+                                            // sprintf(s, "(%d, %d, %d)", sht->msgs, mx, ((struct MOUSE_WINDOWS_Info *)sht->msgs)->dx);
+                                            // putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_000000, s, strlen(s));
                                         }
                                         
                                         break;
