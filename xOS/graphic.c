@@ -196,7 +196,7 @@ void init_screen8(char* vram, int x, int y)
     radius_box_fill(vram, xsize, 0, bar_x + 72, ysize - 43 - bar_bottom, xsize - 8 - bar_x, ysize - 7 - bar_bottom, 6);
     radius_box_fill(vram, xsize, 15, bar_x + 70, ysize - 45 - bar_bottom, xsize - 10 - bar_x, ysize - 9 - bar_bottom, 6);
 
-    radius_box_fill(vram, xsize, 0, bar_x + 12, ysize - 37 - bar_bottom, bar_x + 62, ysize - 12 - bar_bottom, 4);
+    radius_box_fill(vram, xsize, 0, bar_x + 12, ysize - 37 - bar_bottom, bar_x + 62, ysize - 12 - bar_bottom, 4); //开始菜单
     radius_box_fill(vram, xsize, COL8_FFFFFF, bar_x + 10, ysize - 40 - bar_bottom, bar_x + 60, ysize - 14 - bar_bottom, 4);
     putfonts16_chn(vram, xsize, bar_x + 18 + 1, ysize - 34 - bar_bottom, 15, "\1\2");
     putfonts16_chn(vram, xsize, bar_x + 18, ysize - 35 - bar_bottom, 0, "\1\2");

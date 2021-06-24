@@ -226,8 +226,9 @@ void HariMain(void)
                     wait_KBC_sendready();
                     io_out8(PORT_KEYDAT, keycmd_wait);
                 }
-            } else if (512 <= i && i <= 767) { 
-                if (mouse_decode(&mdec, i - 512) != 0) {
+            } else if (512 <= i && i <= 767) {
+                int decode_res = mouse_decode(&mdec, i - 512);
+                if (decode_res != 0) {
                     
                     mx += mdec.x;
                     my += mdec.y;
@@ -324,6 +325,17 @@ void HariMain(void)
                             sheet_slide(sht, new_wx, new_wy); 
                             new_wx = 0x7fffffff;
                         }
+                        mw_info.status = 0;
+                    }
+                    if ((mdec.btn & 0x01) != 0) {
+                        int bar_width;
+                        int bar_x, bar_bottom = 5;
+
+                        bar_width = 0.8 * binfo->scrnx;
+                        bar_x = 0.1 * binfo->scrnx;
+                        if (bar_x + 10 <= x && x <= bar_x + 60 && binfo->scrny - 40 - bar_bottom <= y && y <= binfo->scrny - 14 - bar_bottom) {
+                            
+                        }
                     }
                 }
                 if (key_win) {
@@ -336,7 +348,7 @@ void HariMain(void)
                         mw_info.wy = key_win->vy0;
                         mw_info.dx = dx;
                         mw_info.dy = dy;
-                        mw_info.status = 0;
+                        // mw_info.status = 0;
 
                         for (size_t i = 0; i < sizeof(mw_info); i++) {
                             ((char*)key_win->msgs)[i] = ((char*)&mw_info)[i];
